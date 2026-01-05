@@ -15,6 +15,7 @@ apt-get install -y apt-transport-https ca-certificates curl gpg
 
 echo "[2/7] Adding Kubernetes apt repository..."
 mkdir -p /etc/apt/keyrings
+
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key \
   | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
