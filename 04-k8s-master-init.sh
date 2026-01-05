@@ -29,12 +29,27 @@ kubeadm init \
   --ignore-preflight-errors=all
 
 # ----------------------------
-# 3️⃣ Setup kubectl for the current user
+# 3️⃣ Setup kubectl for non-root users
 # ----------------------------
-echo "[2/4] Setting up kubeconfig..."
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
+echo "[2/4] Setting up kubeconfig for all sudo-capable users..."
+
+# Iterate through users with UID >= 1000 (non-system users)
+for USER_HOME in /home/*; do
+  USER=$(basename $USER_HOME)
+  if id "$USER" >/dev/null 2>&1; then
+    echo "⚙️  Configuring kubeconfig for user: $USER"
+    mkdir -p $USER_HOME/.kube
+    cp -i /etc/kubernetes/admin.conf $USER_HOME/.kube/config
+    chown $USER:$USER $USER_HOME/.kube/config
+  fi
+done
+
+# Also setup for root (optional)
+mkdir -p /root/.kube
+cp -i /etc/kubernetes/admin.conf /root/.kube/config
+
+echo "✅ kubeconfig setup complete for all sudo-capable users."
+echo
 
 # ----------------------------
 # 4️⃣ Install CNI plugin (Flannel)
